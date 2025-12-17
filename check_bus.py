@@ -47,6 +47,7 @@ def check_availability():
         
         # 2. INJECT COOKIE (Bypasses Login/CAPTCHA)
         # We need the 'PHPSESSID' (or similar) from your Secrets
+        print(f"INJECT COOKIE Bypasses Login/CAPTCHA...")
         session_cookie = {
             "name": "PHPSESSID", 
             "value": os.environ["AEROLINE_SESSION_ID"],
@@ -65,7 +66,7 @@ def check_availability():
                 "Action Required: Aeroline Cookie Expired", 
                 "The GitHub Action failed to login. Please grab a new PHPSESSID cookie and update your GitHub Secrets."
             )
-            return
+        #    return
 
         # 4. Fill Search Form (This varies based on their exact input names)
         # Note: We try to interact with the raw form or URL if possible.
@@ -94,7 +95,7 @@ def check_availability():
         # driver.find_element(By.NAME, "submit_button_name").click() 
         
         # For now, let's assume if we stay on plan_trip.php, we are good.
-        if "Select Seats" in driver.page_source or "Journey" in driver.page_source:
+        if "Available" in driver.page_source or "RM 128.00" in driver.page_source:
              send_notification(
                 f"Aeroline Tickets Available: {TARGET_DATE}",
                 f"It looks like tickets might be released! Check now: {SEARCH_URL}"

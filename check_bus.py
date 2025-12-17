@@ -24,7 +24,7 @@ def send_notification(subject, body):
 
     try:
         server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-        server.login(os.environ["EMAIL_SENDER"], os.environ["EMAIL_PASSWORD"])
+        server.login(os.environ["EMAIL_USER"], os.environ["EMAIL_PASSWORD"])
         server.send_message(msg)
         server.quit()
         print("Email sent successfully.")

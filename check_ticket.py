@@ -130,14 +130,14 @@ def job():
     result = check_ticket_availability()
     if result == "FOUND":
         print("Tickets found. Stopping scheduler.")
-        return schedule.CancelJob
+#        return schedule.CancelJob
 
 # Schedule to run every hour
-schedule.every(1).hours.do(job)
+# schedule.every(1).hours.do(job)
 
 print("Script running... Checking immediately first.")
 job() # Run once on startup
 
 while True:
-    schedule.run_pending()
+#    schedule.run_pending()
     time.sleep(1)

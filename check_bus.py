@@ -19,12 +19,12 @@ def send_notification(subject, body):
     msg = EmailMessage()
     msg.set_content(body)
     msg["Subject"] = subject
-    msg["From"] = os.environ["EMAIL_USER"]
+    msg["From"] = os.environ["EMAIL_SENDER"]
     msg["To"] = os.environ["EMAIL_RECEIVER"]
 
     try:
         server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-        server.login(os.environ["EMAIL_USER"], os.environ["EMAIL_PASSWORD"])
+        server.login(os.environ["EMAIL_SENDER"], os.environ["EMAIL_PASSWORD"])
         server.send_message(msg)
         server.quit()
         print("Email sent successfully.")

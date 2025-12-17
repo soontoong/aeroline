@@ -44,7 +44,7 @@ def check_availability():
     try:
         # 1. Go to domain to initialize context
         print("Initializing session...")
-        driver.get(LOGIN_URL)
+        #driver.get(LOGIN_URL)
         
         # 2. INJECT COOKIE (Bypasses Login/CAPTCHA)
         # We need the 'PHPSESSID' (or similar) from your Secrets
@@ -56,11 +56,13 @@ def check_availability():
         }
         driver.add_cookie(session_cookie)
 
-        print(f"DATA {driver.page_source} ")
         
         # 3. Go to Booking Page (Now authenticated)
         print(f"Checking {TARGET_DATE}...")
         driver.get(SEARCH_URL)
+
+        
+        print(f"DATA {driver.page_source} ")
         
         # Check if we were kicked out (Cookie Expired)
         if "sign_in.php" in driver.current_url or "New Aeroline User?" in driver.page_source:

@@ -1,5 +1,9 @@
+import os
 import time
 import schedule
+import smtplib
+import ssl
+from email.message import EmailMessage
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -12,19 +16,51 @@ from datetime import datetime
 
 # --- Configuration ---
 TARGET_URL = "https://www.aeroline.com.my/"
-DEPARTURE_DATE = "22/02/2026"  # Format: DD/MM/YYYY
-ROUTE_VALUE = "SWY - SIN"      # The text value to look for in the dropdown
+DEPARTURE_DATE = "22/02/2026"
+ROUTE_VALUE = "SWY - SIN"
+
+# --- Email Configuration ---
+# We read these from the environment variables for security
+EMAIL_SENDER = os.environ.get("EMAIL_SENDER")
+EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
+EMAIL_RECEIVER = os.environ.get("EMAIL_RECEIVER")
+
+def send_email_alert():
+    """Sends an email notification when tickets are found."""
+    subject = f"URGENT: Aeroline Tickets Available for {DEPARTURE_DATE}!"
+    body = f"""
+    Ticket availability detected!
+    
+    Route: {ROUTE_VALUE}
+    Date: {DEPARTURE_DATE}
+    
+    Go book now: {TARGET_URL}
+    """
+
+    msg = EmailMessage()
+    msg.set_content(body)
+    msg['Subject'] = subject
+    msg['From'] = EMAIL_SENDER
+    msg['To'] = EMAIL_RECEIVER
+
+    try:
+        # Standard Gmail SMTP settings
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+            smtp.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            smtp.send_message(msg)
+        print(">>> Email notification sent successfully!")
+    except Exception as e:
+        print(f">>> Failed to send email: {e}")
 
 def get_driver():
     """Sets up the Chrome Webdriver."""
     chrome_options = Options()
-    # Remove the argument below if you want to see the browser pop up
     chrome_options.add_argument("--headless") 
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--window-size=1920,1080")
     
-    # Automatically manages the driver installation
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=chrome_options)
 
@@ -36,21 +72,15 @@ def check_ticket_availability():
         driver = get_driver()
         driver.get(TARGET_URL)
 
-        # 1. Wait for the 'Route' dropdown to load and select 'SWY - SIN'
-        # We look for the select element that contains the route options
         wait = WebDriverWait(driver, 15)
         
-        # Locating the route dropdown. 
-        # Note: Selectors might need adjustment if the site updates.
-        # We try to find the select element by its likely name or ID in the form.
+        # 1. Select Route
         route_dropdown = wait.until(EC.presence_of_element_located((By.NAME, "route")))
         select = Select(route_dropdown)
         
-        # Select by visible text
         try:
             select.select_by_visible_text(ROUTE_VALUE)
         except Exception:
-            # Fallback: iterate options if exact text match fails
             found = False
             for option in select.options:
                 if "SWY" in option.text and "SIN" in option.text:
@@ -58,46 +88,36 @@ def check_ticket_availability():
                     found = True
                     break
             if not found:
-                print("Error: Could not find the SWY-SIN route in the dropdown.")
+                print("Error: Could not find route.")
                 return
 
-        # 2. Input the Date
-        # Finding the date input field (often named 'ddate' or similar)
+        # 2. Input Date
         date_input = driver.find_element(By.NAME, "ddate")
         date_input.clear()
         date_input.send_keys(DEPARTURE_DATE)
 
-        # 3. Click the 'Search' or 'Next' button
-        # Usually an image input or button type=submit
-        try:
-            search_btn = driver.find_element(By.XPATH, "//input[@type='image' or @type='submit']")
-            search_btn.click()
-        except:
-            print("Error: Could not find the search button.")
-            return
+        # 3. Click Search
+        search_btn = driver.find_element(By.XPATH, "//input[@type='image' or @type='submit']")
+        search_btn.click()
 
-        # 4. Analyze the Results
-        # We wait for the results table or an error message.
-        # If trips are available, they usually appear in a table row.
-        # If not, there is often a message like "No trips available" or empty table.
-        
-        # Wait a moment for page transition
-        time.sleep(5) 
-        
+        # 4. Analyze Results
+        time.sleep(5)
         page_source = driver.page_source.lower()
 
         if "no trip found" in page_source or "no seats available" in page_source:
             print("Status: No tickets available yet.")
         elif "select seat" in page_source or "price" in page_source:
-            # If we see terms indicating booking flow is active
             print("\n" + "="*40)
-            print(f"SUCCESS! Tickets might be available for {DEPARTURE_DATE}!")
-            print(f"Check now: {TARGET_URL}")
+            print(f"SUCCESS! Tickets found for {DEPARTURE_DATE}!")
             print("="*40 + "\n")
-            # Here you could add a function to send an email or play a sound
+            
+            # TRIGGER THE EMAIL
+            send_email_alert()
+            
+            # Optional: Stop the script after finding tickets so you don't get spammed
+            return "FOUND" 
         else:
-            # Ambiguous result, print warning
-            print("Status: Check completed, but result was unclear. (Page might have changed)")
+            print("Status: Result unclear (Check manually).")
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -106,13 +126,17 @@ def check_ticket_availability():
             driver.quit()
 
 # --- Scheduling ---
-# Run once immediately to verify it works
-check_ticket_availability()
+def job():
+    result = check_ticket_availability()
+    if result == "FOUND":
+        print("Tickets found. Stopping scheduler.")
+        return schedule.CancelJob
 
 # Schedule to run every hour
-schedule.every(1).hours.do(check_ticket_availability)
+schedule.every(1).hours.do(job)
 
-print("Script is running. Press Ctrl+C to stop.")
+print("Script running... Checking immediately first.")
+job() # Run once on startup
 
 while True:
     schedule.run_pending()

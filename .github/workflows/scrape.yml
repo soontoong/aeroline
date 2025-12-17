@@ -25,8 +25,8 @@ jobs:
 
       - name: Run Check
         env:
-          EMAIL_USER: ${{ secrets.EMAIL_USER }}
-          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
-          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          EMAIL_USER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_RECEIVER }}
           AEROLINE_SESSION_ID: ${{ secrets.AEROLINE_SESSION_ID }}
         run: python check_bus.py

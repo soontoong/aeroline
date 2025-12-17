@@ -97,6 +97,8 @@ def check_availability():
         # Placeholder for button click:
         driver.find_element(By.NAME, "imageField").click() 
         
+        print(f"DATA {driver.page_source} ")
+        
         # For now, let's assume if we stay on plan_trip.php, we are good.
         if "Available" in driver.page_source or "RM 128.00" in driver.page_source:
              send_notification(

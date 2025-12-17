@@ -12,6 +12,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 TARGET_DATE = "16-02-2026"
 ORIGIN = "SWY" # Sunway
 DEST = "SIN"   # Singapore
+ROUTE_TEXT = "SWY - SIN"    # Sunway Pyramid to Singapore
 LOGIN_URL = "https://www.aeroline.com.my/sign_in.php"
 SEARCH_URL = "https://www.aeroline.com.my/plan_trip.php"
 
@@ -78,6 +79,8 @@ def check_availability():
             # Select Route (Assuming Dropdown)
             # You might need to inspect the page to get exact value for SWY-SIN
             # For now, we print page text to see if we are on the right track
+            route_dropdown = Select(driver.find_element(By.NAME, "route")) # Common name guess
+            route_dropdown.select_by_visible_text(ROUTE_TEXT)
             pass 
         except:
             pass
@@ -92,7 +95,7 @@ def check_availability():
         # (This part requires the exact button ID from the live site)
         
         # Placeholder for button click:
-        # driver.find_element(By.NAME, "submit_button_name").click() 
+        driver.find_element(By.NAME, "imageField").click() 
         
         # For now, let's assume if we stay on plan_trip.php, we are good.
         if "Available" in driver.page_source or "RM 128.00" in driver.page_source:

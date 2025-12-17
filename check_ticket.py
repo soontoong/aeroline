@@ -16,7 +16,7 @@ from datetime import datetime
 
 # --- Configuration ---
 TARGET_URL = "https://www.aeroline.com.my/"
-DEPARTURE_DATE = "22/02/2026"
+DEPARTURE_DATE = "18/02/2026"
 ROUTE_VALUE = "SWY - SIN"
 
 # --- Email Configuration ---

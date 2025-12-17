@@ -12,7 +12,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 TARGET_DATE = "16-02-2026"
 ORIGIN = "SWY" # Sunway
 DEST = "SIN"   # Singapore
-LOGIN_URL = "https://www.aeroline.com.my/sign_in.php"
+LOGIN_URL = "https://www.aeroline.com.my"
 SEARCH_URL = "https://www.aeroline.com.my/plan_trip.php"
 
 def send_notification(subject, body):

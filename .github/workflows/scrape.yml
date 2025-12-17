@@ -1,33 +1,32 @@
-name: Check Aeroline Tickets
+name: Check Bus Ticket
 
 on:
   schedule:
-    # Runs at minute 0 of every hour (e.g., 1:00, 2:00, etc.)
-    - cron: '0 * * * *'
+    # Runs at 00:00 and 12:00 UTC everyday
+    - cron: '0 0,12 * * *'
   workflow_dispatch: # Allows you to run it manually to test
 
 jobs:
-  scrape:
+  check-tickets:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      - name: Install Chrome
-        uses: browser-actions/setup-chrome@latest
-
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
 
-      - name: Run script
+      - name: Run Check
         env:
-          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-          EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
-        run: python check-ticket2.py
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          AEROLINE_SESSION_ID: ${{ secrets.AEROLINE_SESSION_ID }}
+        run: python check_bus.py

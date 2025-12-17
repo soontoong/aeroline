@@ -1,8 +1,7 @@
-import os
 import time
-import schedule
 import smtplib
 import ssl
+import os
 from email.message import EmailMessage
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -16,17 +15,20 @@ from datetime import datetime
 
 # --- Configuration ---
 TARGET_URL = "https://www.aeroline.com.my/"
-DEPARTURE_DATE = "18/02/2026"
+DEPARTURE_DATE = "16/02/2026"
 ROUTE_VALUE = "SWY - SIN"
 
-# --- Email Configuration ---
-# We read these from the environment variables for security
+# --- Email Configuration (via GitHub Secrets) ---
 EMAIL_SENDER = os.environ.get("EMAIL_SENDER")
 EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
 EMAIL_RECEIVER = os.environ.get("EMAIL_RECEIVER")
 
 def send_email_alert():
     """Sends an email notification when tickets are found."""
+    if not EMAIL_SENDER or not EMAIL_PASSWORD:
+        print(">>> Email secrets not found. Skipping email.")
+        return
+
     subject = f"URGENT: Aeroline Tickets Available for {DEPARTURE_DATE}!"
     body = f"""
     Ticket availability detected!
@@ -44,7 +46,6 @@ def send_email_alert():
     msg['To'] = EMAIL_RECEIVER
 
     try:
-        # Standard Gmail SMTP settings
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
             smtp.login(EMAIL_SENDER, EMAIL_PASSWORD)
@@ -104,18 +105,13 @@ def check_ticket_availability():
         time.sleep(5)
         page_source = driver.page_source.lower()
 
-        if "no trip found" in page_source or "no seats available" in page_source:
+        if "not opned yet" in page_source or "We apologize" in page_source:
             print("Status: No tickets available yet.")
-        elif "select seat" in page_source or "price" in page_source:
+        elif "Available" in page_source or "RM 128.00" in page_source:
             print("\n" + "="*40)
             print(f"SUCCESS! Tickets found for {DEPARTURE_DATE}!")
             print("="*40 + "\n")
-            
-            # TRIGGER THE EMAIL
             send_email_alert()
-            
-            # Optional: Stop the script after finding tickets so you don't get spammed
-            return "FOUND" 
         else:
             print("Status: Result unclear (Check manually).")
 
@@ -125,19 +121,6 @@ def check_ticket_availability():
         if driver:
             driver.quit()
 
-# --- Scheduling ---
-def job():
-    result = check_ticket_availability()
-    if result == "FOUND":
-        print("Tickets found. Stopping scheduler.")
-#        return schedule.CancelJob
-
-# Schedule to run every hour
-# schedule.every(1).hours.do(job)
-
-print("Script running... Checking immediately first.")
-job() # Run once on startup
-
-while True:
-#    schedule.run_pending()
-    time.sleep(1)
+# --- Execution ---
+if __name__ == "__main__":
+    check_ticket_availability()

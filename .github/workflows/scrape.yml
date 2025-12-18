@@ -29,4 +29,4 @@ jobs:
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
           AEROLINE_SESSION_ID: ${{ secrets.AEROLINE_SESSION_ID }}
-        run: python check_bus.py
+        run: python check_aeroline.py

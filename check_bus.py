@@ -44,7 +44,7 @@ def check_availability():
     try:
         # 1. Go to domain to initialize context
         print("Initializing session...")
-        #driver.get(LOGIN_URL)
+        driver.get(LOGIN_URL)
         
         # 2. INJECT COOKIE (Bypasses Login/CAPTCHA)
         # We need the 'PHPSESSID' (or similar) from your Secrets
@@ -52,7 +52,7 @@ def check_availability():
         session_cookie = {
             "name": "PHPSESSID", 
             "value": os.environ["AEROLINE_SESSION_ID"],
-            "domain": "www.aeroline.com.my"
+            "domain": "https://www.aeroline.com.my"
         }
         driver.add_cookie(session_cookie)
 

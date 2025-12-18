@@ -47,7 +47,8 @@ def check_availability():
         driver.get("https://www.aeroline.com.my/")
         
         wait = WebDriverWait(driver, 20)
-
+        page_source = driver.page_source.lower()
+        print(f"Page info: {page_source}...")          
         print(f"Checking route for {ROUTE_KEYWORD}...")
         # 1. Select Route
         route_dropdown = wait.until(EC.presence_of_element_located(

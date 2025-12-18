@@ -1,10 +1,11 @@
-name: Check Bus Ticket
+name: Aeroline Ticket Checker
 
 on:
   schedule:
-    # Runs at 00:00 and 12:00 UTC everyday
+    # Runs at 00:00 and 12:00 UTC every day
     - cron: '0 0,12 * * *'
-  workflow_dispatch: # Allows you to run it manually to test
+  workflow_dispatch: 
+    # Allows you to manually trigger the run from GitHub UI for testing
 
 jobs:
   check-tickets:
@@ -23,10 +24,9 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Run Check
+      - name: Run Ticket Checker
         env:
-          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_USER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASSPORT }}
           EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
-          AEROLINE_SESSION_ID: ${{ secrets.AEROLINE_SESSION_ID }}
         run: python check_aeroline.py

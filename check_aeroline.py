@@ -47,7 +47,8 @@ def check_availability():
         driver.get("https://www.aeroline.com.my/")
         
         wait = WebDriverWait(driver, 20)
-        
+
+        print(f"Checking route for {ROUTE_KEYWORD}...")
         # 1. Select Route
         route_dropdown = wait.until(EC.presence_of_element_located(
             (By.XPATH, f"//select[.//option[contains(text(), '{ROUTE_KEYWORD}')]]")
@@ -58,11 +59,12 @@ def check_availability():
                 select.select_by_visible_text(option.text)
                 break
         
+        print(f"Checking Aeroline for {TARGET_DATE}...")  
         # 2. Enter Date
         date_input = driver.find_element(By.XPATH, "//input[contains(@placeholder, 'DD/MM/YYYY') or contains(@title, 'Date')]")
         date_input.clear()
         date_input.send_keys(TARGET_DATE)
-        
+
         # 3. Click Book/Search
         # Note: Selectors may change; looking for the submit button
         search_btn = driver.find_element(By.XPATH, "//input[@type='image' or @type='submit'] | //button[contains(text(), 'Book')]")
@@ -73,6 +75,7 @@ def check_availability():
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         page_source = driver.page_source.lower()
 
+        print(f"Page info: {page_source}...")  
         # Logic: If we see "select seats" or specific pricing, it's likely open.
         # If we see "no trips" or "no schedule", it's closed.
         if "no trips found" in page_source or "no schedule" in page_source:

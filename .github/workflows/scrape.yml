@@ -29,4 +29,4 @@ jobs:
           EMAIL_USER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASSPORT }}
           EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
-        run: python check_aeroline.py
+        run: python check_bus.py
